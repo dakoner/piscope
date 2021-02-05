@@ -26,7 +26,7 @@ class Tui(QtCore.QObject):
     def on_gamepadSignal(self, type_, code, state):
         if type_ == 'Sync':
             return
-        if type_ == 'Key':
+        elif type_ == 'Key':
             if code == 'BTN_TOP2' and state == 0:
                     cmd = "$J=G91 F10000 Z-0.1"
                     self.grblesp32.send_line(cmd)
@@ -35,16 +35,6 @@ class Tui(QtCore.QObject):
                     cmd = "$J=G91 F10000 Z0.1"
                     self.grblesp32.send_line(cmd)
                     return
-            # elif code == 'BTN_TR' and state == 0:
-            #         cmd = "M5"
-            #         self.grblesp32.send_line(cmd)
-            #         return
-            # elif code == 'BTN_TL' and state == 0:
-            #         cmd = "M3 S1024"
-            #         self.grblesp32.send_line(cmd)
-            #         return
-            #elif code == 'BTN_EAST':
-            #    self.app.quit()
             else:
                 print(type_, code, state)
         elif type_ == 'Absolute':
@@ -61,8 +51,6 @@ class Tui(QtCore.QObject):
                     cmd = "$J=G91 F10000 X25"
                     self.grblesp32.send_line(cmd)
                     return
-            
-                    
             elif code == 'ABS_HAT0Y':
                 if state == -1:
                     cmd = "$J=G91 F10000 Y25"
@@ -72,6 +60,8 @@ class Tui(QtCore.QObject):
                     cmd = "$J=G91 F10000 Y-25"
                     self.grblesp32.send_line(cmd)
                     return
+
+
     def on_ramps_read(self, data):
         print("grblesp32 serial read:", data)
 

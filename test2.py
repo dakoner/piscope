@@ -23,38 +23,42 @@ class Tui(QtCore.QObject):
 
     @QtCore.pyqtSlot(str, str, int)
     def on_gamepadSignal(self, type_, code, state):
-        print(type_, code, state)
-        if type_ == 'Absolute':
-            if code == 'ABS_HAT0Y':
-                if state == -1:
-                    cmd = "$J=G91 F10000 Y25"
+        if type_ == 'Sync':
+            return
+        elif type_ == 'Key':
+            if code == 'BTN_TOP2' and state == 0:
+                    cmd = "$J=G91 F10000 Z-0.1"
                     self.client.publish("grblesp32/command", cmd)
-                elif state == 1:
-                    cmd = "$J=G91 F10000 Y-25"
+                    return
+            elif code == 'BTN_PINKIE' and state == 0:
+                    cmd = "$J=G91 F10000 Z0.1"
                     self.client.publish("grblesp32/command", cmd)
-            if code == 'ABS_HAT0X':
+                    return
+            else:
+                print(type_, code, state)
+        elif type_ == 'Absolute':
+            if code == 'ABS_THROTTLE':
+                cmd = "M3 S%d" % (1024 - (state * 4))
+                self.client.publish("grblesp32/command", cmd)
+                return
+            elif code == 'ABS_HAT0X':
                 if state == -1:
                     cmd = "$J=G91 F10000 X-25"
                     self.client.publish("grblesp32/command", cmd)
+                    return
                 elif state == 1:
                     cmd = "$J=G91 F10000 X25"
                     self.client.publish("grblesp32/command", cmd)
-        if type_ == 'Key':
-            if code == 'BTN_WEST' and state == 1:
-                    cmd = "$J=G91 F10000 Z-0.1"
+                    return
+            elif code == 'ABS_HAT0Y':
+                if state == -1:
+                    cmd = "$J=G91 F10000 Y25"
                     self.client.publish("grblesp32/command", cmd)
-            if code == 'BTN_SOUTH' and state == 1:
-                    cmd = "$J=G91 F10000 Z0.1"
+                    return
+                elif state == 1:
+                    cmd = "$J=G91 F10000 Y-25"
                     self.client.publish("grblesp32/command", cmd)
-            # if code == 'ABS_Y':
-            #     cmd = "$J=G91 G21 F1000 X100"
-            #     self.client.publish("grblesp32/command", float(state))
-            # elif code == 'ABS_RY':
-            #     self.client.publish("robitt/control/right_setpoint", float(state))
-        if type_ == 'Key':
-            if code == 'BTN_EAST':
-                self.app.quit()
-
+                    return
 
 if __name__ == "__main__":
     import sys

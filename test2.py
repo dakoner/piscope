@@ -34,10 +34,10 @@ class Tui(QtCore.QObject):
             return
         elif type_ == 'Key':
             if code == 'BTN_PINKIE' and state == 0:
-                    cmd = "$J=G91 F10000 Z-0.1"
+                    cmd = "$J=G91 F10000 Z-0.05"
                     self.client.publish("grblesp32/command", cmd)
             elif code == 'BTN_TOP' and state == 0:
-                    cmd = "$J=G91 F10000 Z0.1"
+                    cmd = "$J=G91 F10000 Z0.05"
                     self.client.publish("grblesp32/command", cmd)
             print(type_, code, state)
         elif type_ == 'Absolute':
@@ -51,17 +51,17 @@ class Tui(QtCore.QObject):
                     self.lastValue = value
             elif code == 'ABS_HAT0X':
                 if state == -1:
-                    cmd = "$J=G91 F10000 X-15"
+                    cmd = "$J=G91 F10000 Y-15"
                     self.client.publish("grblesp32/command", cmd)
                 elif state == 1:
-                    cmd = "$J=G91 F10000 X15"
+                    cmd = "$J=G91 F10000 Y15"
                     self.client.publish("grblesp32/command", cmd)
             elif code == 'ABS_HAT0Y':
                 if state == -1:
-                    cmd = "$J=G91 F10000 Y15"
+                    cmd = "$J=G91 F10000 X15"
                     self.client.publish("grblesp32/command", cmd)
                 elif state == 1:
-                    cmd = "$J=G91 F10000 Y-15"
+                    cmd = "$J=G91 F10000 X-15"
                     self.client.publish("grblesp32/command", cmd)
             elif code == 'ABS_RZ':
                     return

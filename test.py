@@ -1,3 +1,4 @@
+
 import math
 from PyQt5 import QtCore
 from mqtt_qobject import MqttClient
@@ -24,7 +25,8 @@ class Tui(QtCore.QObject):
     def on_stateChanged(self, state):
         if state == MqttClient.Connected:
             self.client.subscribe("grblesp32/command")
-            
+            self.client.subscribe("grblesp32/cancel")
+
 
     @QtCore.pyqtSlot(str, str)
     def on_messageSignal(self, topic, payload):
@@ -32,6 +34,8 @@ class Tui(QtCore.QObject):
             print("Got command:", payload)
             if not self.grblesp32.send_line(payload):
                 print("Failed sending line", payload)
+        elif topic == 'grblesp32/cancel':
+            self.grblesp32.internal_write(0x85)
 
     def on_ramps_read(self, data):
         print("grblesp32 serial read:", data)

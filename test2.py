@@ -1,7 +1,12 @@
 import math
 from PyQt5 import QtCore
+import sys
+import time
+sys.path.insert(0, "y:\\home\\dek\\src\\gamepad_qobject\\gamepad_qobject")
 from gamepad_qobject import Gamepad
+sys.path.insert(0, "y:\\home\\dek\\src\\mqtt_qobject\\mqtt_qobject")
 from mqtt_qobject import MqttClient
+
 
 class Tui(QtCore.QObject):
 
@@ -17,48 +22,73 @@ class Tui(QtCore.QObject):
         self.gamepad_thread.start()
 
         self.client = MqttClient(self)
-        self.client.hostname = "localhost"
+        self.client.hostname = "postscope.local"
         self.client.connectToHost()
 
+        self.lastTime = time.time()
+        self.lastValue = 0
 
     @QtCore.pyqtSlot(str, str, int)
     def on_gamepadSignal(self, type_, code, state):
         if type_ == 'Sync':
             return
         elif type_ == 'Key':
-            if code == 'BTN_TOP2' and state == 0:
+            if code == 'BTN_PINKIE' and state == 0:
                     cmd = "$J=G91 F10000 Z-0.1"
                     self.client.publish("grblesp32/command", cmd)
-                    return
-            elif code == 'BTN_PINKIE' and state == 0:
+            elif code == 'BTN_TOP' and state == 0:
                     cmd = "$J=G91 F10000 Z0.1"
                     self.client.publish("grblesp32/command", cmd)
-                    return
-            else:
-                print(type_, code, state)
+            print(type_, code, state)
         elif type_ == 'Absolute':
             if code == 'ABS_THROTTLE':
-                cmd = "M3 S%d" % (1024 - (state * 4))
-                self.client.publish("grblesp32/command", cmd)
-                return
+                t = time.time()
+                value =  (1024 - (state * 4))
+                if abs(value - self.lastValue) > 5 or t - self.lastTime > 1000:
+                    cmd = "M3 S%d" % value
+                    self.client.publish("grblesp32/command", cmd)
+                    self.lastTime = t
+                    self.lastValue = value
             elif code == 'ABS_HAT0X':
                 if state == -1:
-                    cmd = "$J=G91 F10000 X-25"
+                    cmd = "$J=G91 F10000 X-15"
                     self.client.publish("grblesp32/command", cmd)
-                    return
                 elif state == 1:
-                    cmd = "$J=G91 F10000 X25"
+                    cmd = "$J=G91 F10000 X15"
                     self.client.publish("grblesp32/command", cmd)
-                    return
             elif code == 'ABS_HAT0Y':
                 if state == -1:
-                    cmd = "$J=G91 F10000 Y25"
+                    cmd = "$J=G91 F10000 Y15"
                     self.client.publish("grblesp32/command", cmd)
-                    return
                 elif state == 1:
-                    cmd = "$J=G91 F10000 Y-25"
+                    cmd = "$J=G91 F10000 Y-15"
                     self.client.publish("grblesp32/command", cmd)
+            elif code == 'ABS_RZ':
                     return
+            # elif code == 'ABS_X':
+            #     f = state - 512
+            #     if abs(f) > 20:
+            #         if f < 0:
+            #             step = -50
+            #         else:
+            #             step = 50
+            #         cmd = "$J=G91 F%d X%d" % (int(abs(f)*25), step)
+            #         print(cmd)
+            #         self.client.publish("grblesp32/command", cmd)
+            #     else:
+            #         print("cancel")
+            #         self.client.publish("grblesp32/cancel", "")
+            # elif code == 'ABS_Y':
+            #     f = -state + 512
+            #     if abs(f) > 20:
+            #         if f < 0:
+            #             step = -50
+            #         else:
+            #             step = 50
+            #         cmd = "$J=G91 F%d Y%d" % (int(abs(f)*25), step)
+            #         self.client.publish("grblesp32/command", cmd)
+            #     else:
+            #         self.client.publish("grblesp32/cancel", "")
 
 if __name__ == "__main__":
     import sys

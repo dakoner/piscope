@@ -1,0 +1,14 @@
+[Unit]
+Description=Scope service
+After=network-online.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/piscope/test.py
+User=pi
+Restart=on-failure
+Environment=PYTHONPATH=/home/pi/gamepad_qobject/gamepad_qobject:/home/pi/mqtt_qobject/mqtt_qobject:/home/pi/qt_grbl
+

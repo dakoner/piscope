@@ -41,12 +41,13 @@ class Tui(QtCore.QObject):
         print("grblesp32 serial read:", data)
         self.client.publish("grblesp32/output", data)
 
-    def on_ramps_status(self, data):
-        print("grblesp32 serial status:", data)
-        self.client.publish("grblesp32/status")
+    def on_ramps_status(self, status):
+        print("grblesp32 serial status:", status)
+        self.client.publish("grblesp32/status", status)
 
     def on_ramps_state(self, state):
         print("grblesp32 serial state:", state)
+        self.client.publish("grblesp32/state", state)
 
 if __name__ == "__main__":
     import sys

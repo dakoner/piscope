@@ -1,4 +1,4 @@
-
+#!/usr/bin/python3
 import math
 from PyQt5 import QtCore
 from mqtt_qobject import MqttClient

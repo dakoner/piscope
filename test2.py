@@ -38,16 +38,16 @@ class Tui(QtCore.QObject):
 
         self.status_timer = QtCore.QTimer()
         self.status_timer.timeout.connect(self.do_status)
-        self.status_timer.start(100)
+        self.status_timer.start(25)
 
     def do_status(self):
         if self.move_x or self.move_y:
             cmd = "$J=G91"
             if self.move_x:
                 if self.last_x > 0:
-                    step = 10
-                else:
                     step = -10
+                else:
+                    step = 10
                 cmd += " Y%d" % step
             if self.move_y:
                 if self.last_y > 0:
@@ -56,7 +56,7 @@ class Tui(QtCore.QObject):
                     step = 10
 
                 cmd += " X%d" % step
-            feed = int(math.sqrt((self.last_x * self.last_x) + (self.last_y * self.last_y))/4)
+            feed = int(math.sqrt((self.last_x * self.last_x) + (self.last_y * self.last_y)))
             cmd += " F%d" % feed
             self.client.publish("grblesp32/command", cmd)
 

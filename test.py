@@ -35,6 +35,7 @@ class Tui(QtCore.QObject):
             if not self.grblesp32.send_line(payload):
                 print("Failed sending line", payload)
         elif topic == 'grblesp32/cancel':
+            print("Cancelling")
             self.grblesp32.internal_write(0x85)
 
     def on_ramps_read(self, data):

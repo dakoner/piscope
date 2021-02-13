@@ -38,22 +38,22 @@ class Tui(QtCore.QObject):
 
         self.status_timer = QtCore.QTimer()
         self.status_timer.timeout.connect(self.do_status)
-        self.status_timer.start(25)
+        self.status_timer.start(5)
 
     def do_status(self):
         if self.move_x or self.move_y:
             cmd = "$J=G91"
             if self.move_x:
                 if self.last_x > 0:
-                    step = -10
+                    step = -1
                 else:
-                    step = 10
+                    step = 1
                 cmd += " Y%d" % step
             if self.move_y:
                 if self.last_y > 0:
-                    step = -10
+                    step = -1
                 else:
-                    step = 10
+                    step = 1
 
                 cmd += " X%d" % step
             feed = int(math.sqrt((self.last_x * self.last_x) + (self.last_y * self.last_y)))
@@ -98,22 +98,24 @@ class Tui(QtCore.QObject):
                     print("send cmd", cmd)
                     self.client.publish("grblesp32/command", cmd)
             elif code == 'ABS_X':
-                if abs(state) > 20:
+                if abs(state) > 100:
                     self.move_x = True
                     self.last_x = state
                 else:
                     self.move_x = False
                     self.last_x = 0
-                    self.client.publish("grblesp32/cancel", "")
+                    if not self.move_y:
+                        self.client.publish("grblesp32/cancel", "")
             elif code == 'ABS_Y':
-                if abs(state) > 20:
+                if abs(state) > 100:
                     self.move_y = True
                     self.last_y = state
                 else:
                     self.move_y = False
                     self.last_y = 0
-                    self.client.publish("grblesp32/cancel", "")
-
+                    if not self.move_x:
+                        self.client.publish("grblesp32/cancel", "")
+ 
             # if code == 'ABS_THROTTLE':
             #     t = time.time()
             #     value =  (1024 - (state * 4))

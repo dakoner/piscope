@@ -9,7 +9,7 @@ from gamepad_qobject import Gamepad
 sys.path.insert(0, "y:\\home\\dek\\src\\mqtt_qobject\\mqtt_qobject")
 from mqtt_qobject import MqttClient
 
-
+STEP_SIZE=2
 class Tui(QtCore.QObject):
 
     def __init__(self, app):
@@ -24,7 +24,7 @@ class Tui(QtCore.QObject):
         self.gamepad_thread.start()
 
         self.client = MqttClient(self)
-        self.client.hostname = "postscope.local"
+        self.client.hostname = "localhost"
         self.client.connectToHost()
         self.client.stateChanged.connect(self.on_stateChanged)
         self.client.messageSignal.connect(self.on_messageSignal)
@@ -40,20 +40,22 @@ class Tui(QtCore.QObject):
         self.status_timer.timeout.connect(self.do_status)
         self.status_timer.start(5)
 
+        self.led_state = 0
+
     def do_status(self):
         if self.move_x or self.move_y:
             cmd = "$J=G91"
             if self.move_x:
                 if self.last_x > 0:
-                    step = -1
+                    step = -STEP_SIZE
                 else:
-                    step = 1
+                    step = STEP_SIZE
                 cmd += " Y%d" % step
             if self.move_y:
                 if self.last_y > 0:
-                    step = -1
+                    step = -STEP_SIZE
                 else:
-                    step = 1
+                    step = STEP_SIZE
 
                 cmd += " X%d" % step
             feed = int(math.sqrt((self.last_x * self.last_x) + (self.last_y * self.last_y)))
@@ -85,7 +87,15 @@ class Tui(QtCore.QObject):
                     cmd = "M5"
                     self.client.publish("grblesp32/command", cmd)
             elif code == 'BTN_START' and state == 1:
-                    cmd = "M3 S100"
+                    if self.led_state < 4:
+                        self.led_state += 1
+                    else:
+                        self.led_state = 0
+                    strength = (self.led_state)*1024
+                    if strength == 0:
+                        strength = 100
+                    print("led strength: ", strength)
+                    cmd = "M3 S%d" % strength
                     self.client.publish("grblesp32/command", cmd)
         elif type_ == 'Absolute':
             if code in ('ABS_HAT0X', 'ABS_HAT0Y'):

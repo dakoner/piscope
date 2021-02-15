@@ -7,8 +7,8 @@ WantedBy=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/home/pi/piscope/test2.py
+ExecStart=/home/pi/piscope/joystick.py
 User=pi
-Restart=on-failure
+Restart=always
 Environment=PYTHONPATH=/home/pi/gamepad_qobject/gamepad_qobject:/home/pi/mqtt_qobject/mqtt_qobject:/home/pi/qt_grbl
 
